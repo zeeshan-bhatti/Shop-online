@@ -1,0 +1,37 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+{% load cart %}
+
+{% block content %}
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Orders</th>
+                <th>Quantity</th>
+                <th>Sales</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in "product"|orders %}
+            <tr>
+                
+                <td scope="row">{{order.product|get_product_name}}</td>
+                <td>{{order.dcount}}</td>
+                <td>{{order.product|total_quantity}}</td>
+                <td>{{order.product|get_price:"product"}}</td>
+
+            </tr>
+            {% endfor %}
+            <tr>
+                <td scope="row">  </td>
+                <td >  </td>
+                <td><b>Total Sales </b></td>
+                <td><b>{{ "z"|total_sales }}</b></td>
+            </tr>
+        </tbody>
+    </table>
+    
+{% endblock %}
+

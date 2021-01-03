@@ -1,0 +1,97 @@
+{% extends 'base.htm' %}
+{% block content %}
+{% load cart %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="list-group col-lg-3 m-2">
+      <a href="/offers" 
+      class="list-group-item list-group-item-action {% if cat|check_active %} active {% endif %}">
+      All Products</a>
+      {% for item in category %}
+      <a href="/offers?category={{item.id}}"
+       class="list-group-item list-group-item-action {% if item|match:cat %} active {% endif %} ">{{item.name}}</a>
+       {% for sub in sub_category %}
+        {% if sub|match_category:item %}
+      <ul><a href="/offers?category=0{{sub.id}}"
+       class="list-group-item list-group-item-action
+       {% if sub|sub_match:cat %} active {% endif %}">{{sub.name}}</a></ul>
+       {% endif %}
+      {% endfor %}
+      {% endfor %}
+    </div>
+    <div class="col">
+      <div class="row ">
+        {% if products %}
+        {% for product in products %}
+        <div class="col mb-2 mx-auto mt-2">
+          <div class="card h-100" style="width: 18rem;" id="{{product.id}}">
+            <img
+              src="{{ product.image.url }}"
+              class="card-img-top"
+              alt="https://images.app.goo.gl/cp2pa65zm4fk8SqA7"
+              height="300"
+              
+            />
+            <div class="card-body">
+              <h6 class="card-title">{{product.name}}</h6>
+              {% if product.discount %}
+              <span class="text-danger">RS.<del> 
+                {{product.price}}
+
+              </del></span>
+            
+            
+            <span class="float-right badge badge-info">Save {{product.discount}}%</span>
+            {% endif %}
+          </div>
+          
+
+              <p class="card-text"><b>Rs. {{product|calculate_discount}}</b></p>
+              
+            {% if product.stock_quantity %}
+              {% if  product|is_in_cart:request.session.cart %}
+              <div class="row">
+                <form action="/offers/?category={{cat}}#{{product.id}}"  class="col-3" method="post">
+                  {% csrf_token %}
+                  <input type="text" name="product" value="{{product.id}}" hidden>
+                  <input type="text" name="remove" value='True' hidden>
+                  <input type="submit" value="-" class="btn btn-warning">
+                </form>
+                  <div class="col text-center">{{product|cart_quantity:request.session.cart}} in cart</div>
+                <form action="/offers/?category={{cat}}#{{product.id}}"  class="col-3" method="post">
+                  {% csrf_token %}
+                  <input type="text" name="product" value="{{product.id}}" hidden>
+                  <input type="submit" value="+" class="btn btn-success">
+                </form>
+                
+              </div>
+              {% else %}
+              <form  action="/offers/?category={{cat}}#{{product.id}}" method="POST">
+                {% csrf_token %}
+                <input type="text" name="product" value="{{product.id}}" hidden>
+                <input type="submit" class="btn btn-primary" value="Add to Cart">
+              </form>
+              {% endif %}
+              {% else %}
+                <span class="float-right badge badge-danger">Out of stock</span>
+
+              {% endif %}
+              
+            </div>
+            
+        
+        </div>
+    
+        {% endfor %}
+      
+        
+
+        {% else %}
+        <h1>No products Available </h1>
+        {% endif %}
+      </div>
+  </div>
+  
+</div>
+
+{% endblock %}

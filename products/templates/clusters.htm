@@ -1,0 +1,99 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+{% load cart %}
+{% block extrahead %}
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.min.js"></script>
+    <script>
+        var randomColorGenerator = function () {
+            return '#' + (Math.random().toString(16) + '0000000').slice(2, 8);
+        };
+        var options = {
+            responsive: true,
+            maintainAspectRatio: true,
+            legend: {
+                position: 'left'
+            },
+            title: {
+                display: true
+            },
+            animation: {
+                animateScale: true,
+                animateRotate: true
+            }
+        };
+        window.onload = function () {
+            
+             ctx = document.getElementById("kmeans-amount-chart");
+            lineChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ["cluster 0","cluster 1","cluster 2","cluster 3"],
+                    datasets: [{
+                        label:"Clusters",
+                        data: [{% for ct in "amount"|view_trends %}'{{ ct }}',{% endfor %}],
+                        backgroundColor: [{% for language in "zeeshan"|products %}randomColorGenerator(),{% endfor %}]
+                    }]
+                }, options: options
+            });
+            ctx = document.getElementById("kmeans-frequency-chart");
+            lineChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ["cluster 0","cluster 1","cluster 2","cluster 3"],
+                    datasets: [{
+                        label:"Clusters",
+                        data: [{% for ct in "frequency"|view_trends %}'{{ ct }}',{% endfor %}],
+                        backgroundColor: [{% for language in "zeeshan"|products %}randomColorGenerator(),{% endfor %}]
+                    }]
+                }, options: options
+            });
+            ctx = document.getElementById("kmeans-recency-chart");
+            lineChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ["cluster 0","cluster 1","cluster 2","cluster 3"],
+                    datasets: [{
+                        label:"Clusters",
+                        data: [{% for ct in "recency"|view_trends %}'{{ ct }}',{% endfor %}],
+                        backgroundColor: [{% for language in "zeeshan"|products %}randomColorGenerator(),{% endfor %}]
+                    }]
+                }, options: options
+            });
+        }
+    </script>
+{% endblock %}
+{% block content %}
+    
+    
+    
+    
+        <h3><b>Clusters based on Revenue Generation</b> </h3>
+        
+        <div class="row">
+        <div class="col-sm-4">
+            <canvas id="kmeans-amount-chart" ></canvas>
+        </div>
+        <hr/>
+        <h3><b>Clusters based on Frequent Products purchased</b> </h3>
+        <div class="col-sm-4">
+            <canvas id="kmeans-frequency-chart" ></canvas>
+        </div>
+         <hr/>
+        <h3><b>Clusters based on Recency</b> </h3>
+        <div class="col-sm-4">
+            <canvas id="kmeans-recency-chart" ></canvas>
+        </div></div>
+        <hr/>
+        <div class="container">
+        {{"data"|view_trends|safe}}
+        </div>
+        
+            
+        
+            
+    
+
+{% endblock %}
+

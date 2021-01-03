@@ -1,0 +1,179 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+{% load cart %}
+{% block extrahead %}
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.min.js"></script>
+    <script>
+        var randomColorGenerator = function () {
+            return '#' + (Math.random().toString(16) + '0000000').slice(2, 8);
+        };
+        var options = {
+            responsive: true,
+            maintainAspectRatio: true,
+            legend: {
+                position: 'left'
+            },
+            title: {
+                display: true
+            },
+            animation: {
+                animateScale: true,
+                animateRotate: true
+            },
+            scales: {
+    xAxes: [{
+      ticks: {
+        callback: function(value) {
+          if (value.length > 10) {
+            return value.substr(0, 10) + '...'; //truncate
+          } else {
+            return value
+          }
+
+        },
+      }
+    }],
+    yAxes: [{}]
+  },
+  tooltips: {
+    enabled: true,
+    mode: 'label',
+    callbacks: {
+      title: function(tooltipItems, data) {
+        var idx = tooltipItems[0].index;
+        return 'Title:' + data.labels[idx]; //do something with title
+      },
+      label: function(tooltipItems, data) {
+        //var idx = tooltipItems.index;
+        //return data.labels[idx] + ' €';
+        return tooltipItems.xLabel;
+      }
+    }
+  },
+        };
+        window.onload = function () {
+            ctx = document.getElementById("orders-chart");
+            //{% regroup "z"|products|dictsort:"order_date" by grades as grades_list %}
+            lineChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ["January","Feburary","March","April","May","June","July","August","September","October",
+                    "November","December"],
+                    datasets: [{
+                        label:'No. of orders',
+                        data: [{{1|month_orders}},{{2|month_orders}},{{3|month_orders}},{{4|month_orders}},{{5|month_orders}},
+                        {{6|month_orders}},{{7|month_orders}},{{8|month_orders}},{{9|month_orders}},{{10|month_orders}},
+                        {{11|month_orders}},{{12|month_orders}},],
+                        backgroundColor: [{% for grades in "zeeshan"|products %}randomColorGenerator(),{% endfor %}]
+                    }]
+                }, options: options
+            });
+            ctx = document.getElementById("category-chart");
+            //{% regroup cl.queryset|dictsort:"stock_quantity" by get_language_display as language_list %}
+            lineChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [{% for cat in "z"|category %}'{{ cat.name }}',{% endfor %}],
+                    datasets: [{
+                        label:"No. of Products Sold",
+                        data: [{% for cat in "z"|category %}'{{ cat.id|category_orders }}',{% endfor %}],
+                        backgroundColor: [{% for language in "zeeshan"|products %}randomColorGenerator(),{% endfor %}]
+                    }]
+                }, options: options
+            });
+
+            ctx = document.getElementById("sub_category-chart");
+            //{% regroup cl.queryset|dictsort:"stock_quantity" by get_language_display as language_list %}
+            lineChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [{% for cat in "z"|sub_category %}'{{ cat.name }}',{% endfor %}],
+                    datasets: [{
+                        label:"No. of Products Sold",
+                        data: [{% for cat in "z"|sub_category %}'{{ cat.id|sub_category_orders }}',{% endfor %}],
+                        backgroundColor: [{% for language in "zeeshan"|products %}randomColorGenerator(),{% endfor %}]
+                    }]
+                }, options: options
+            });
+
+            ctx = document.getElementById("city-chart");
+            //{% regroup cl.queryset|dictsort:"stock_quantity" by get_language_display as language_list %}
+            lineChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [{% for ct in "city"|city %}'{{ ct }}',{% endfor %}],
+                    datasets: [{
+                        label:"No. of Orders",
+                        data: [{% for ct in "count"|city %}'{{ ct }}',{% endfor %}],
+                        backgroundColor: [{% for language in "zeeshan"|products %}randomColorGenerator(),{% endfor %}]
+                    }]
+                }, options: options
+            });
+             ctx = document.getElementById("selling-products");
+            lineChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [{% for ct in "city"|selling_products|slice:":20" %}'{{ ct|get_product_name }}',{% endfor %}],
+                    datasets: [{
+                        label:"No. of Orders",
+                        data: [{% for ct in "count"|selling_products|slice:":20" %}'{{ ct }}',{% endfor %}],
+                        backgroundColor: [{% for language in "zeeshan"|products %}randomColorGenerator(),{% endfor %}]
+                    }]
+                }, options: options
+            });
+
+             ctx = document.getElementById("least_selling-products");
+            lineChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [{% for ct in "city"|least_selling_products|slice:":20" %}'{{ ct|get_product_name }}',{% endfor %}],
+                    datasets: [{
+                        label:"No. of Orders",
+                        data: [{% for ct in "count"|least_selling_products|slice:":20" %}'{{ ct }}',{% endfor %}],
+                        backgroundColor: [{% for language in "zeeshan"|products %}randomColorGenerator(),{% endfor %}]
+                    }]
+                }, options: options
+            });
+            
+        }
+    </script>
+{% endblock %}
+{% block content %}
+    
+    
+    
+    <div class="col-sm-8">
+        <h3><b>Monthly No. of Orders</b> </h3>
+            <canvas id="orders-chart" style="width: 100px !important;"></canvas>
+        </div>
+        <hr>
+        <h3><b>Top Trending Categories</b> </h3>
+    <div class="col-sm-7">
+            <canvas id="category-chart" style="width: 100px !important;"></canvas>
+        </div>
+        <hr>
+        <h3><b>Top Trending Sub-Categories</b> </h3>
+    
+            <canvas id="sub_category-chart" ></canvas>
+
+        <h3><b>Top Trending Cities</b> </h3>
+    
+            <canvas id="city-chart" ></canvas>
+        <h3><b>Most selling products</b> </h3>
+    
+            <canvas id="selling-products" ></canvas>
+
+        <h3><b>Least selling products</b> </h3>
+    
+            <canvas id="least_selling-products" ></canvas>
+        
+        
+            
+        
+            
+    
+
+{% endblock %}
+
